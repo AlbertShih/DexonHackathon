@@ -28,8 +28,11 @@ contract Game {
     uint feeToAnsAQuestion = 0;
     uint rewardOfCorrectAnser = 3;
 
+
+    
     constructor(address _topOwner)
     public
+    payable
     {
         owner = msg.sender;
         topOwner = _topOwner;
@@ -60,9 +63,9 @@ contract Game {
     returns (uint[]) // 回傳的question的unique ID. 不是 index.
     {
         // 變成廠商要付錢
-        uint totalFee = feeToOwnAQuestion * _numOfQuesToSolve;
-        require (address(owner).balance >= totalFee);
-        topOwner.transfer(totalFee);
+        // uint totalFee = feeToOwnAQuestion * _numOfQuesToSolve;
+        // require (address(owner).balance >= totalFee);
+        // topOwner.transfer(totalFee);
 
         uint iniUnassignLen = unassignList.length;
         uint256 nowTime = now;
@@ -99,15 +102,22 @@ contract Game {
         updateTime = now;
         return whoOwnIDsMap[msg.sender];
     }
+    
+    function ViewOwnIDSMap()
+    external
+    view
+    returns (uint[])
+    {
+        return whoOwnIDsMap[msg.sender];
+    }
 
     function SubmitAnser(uint _quesID, bytes32 _ansHash)
     external
-    payable
     returns (bool)
     {
         // require(msg.sender == tx.origin);
         // Check user is the question owner able to provide anser
-        require(assignedMap[_quesID].ownerAbleToAnser == msg.sender);
+        // require(assignedMap[_quesID].ownerAbleToAnser == msg.sender);
         if (assignedMap[_quesID].assignTime + 10 minutes < now) {
             // 失效了回去Unassign
             addAssignToUnassign(_quesID);
@@ -117,10 +127,10 @@ contract Game {
         // If the anwser is correct and there is enough fee to provide anser, transfer the money
         if(assignedMap[_quesID].answerHash == _ansHash) // TBD, Add unit
         {
-            require(address(this).balance > rewardOfCorrectAnser);   //TBD, will this happen?
-            require(assignedMap[_quesID].reward <= address(owner).balance);
+            //require(address(this).balance > rewardOfCorrectAnser);   //TBD, will this happen?
+            //require(assignedMap[_quesID].reward <= address(owner).balance);
             msg.sender.transfer(assignedMap[_quesID].reward);
-
+            updateTime = now;
             return true;
         }
         updateTime = now;
@@ -158,7 +168,7 @@ contract Game {
     // }
 
     modifier onlyOwner() {
-        require(owner == msg.sender);
+        //require(owner == msg.sender);
         _;
     }
 

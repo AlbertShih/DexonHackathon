@@ -4,10 +4,13 @@ import "./Game.sol";
 
 contract GameInterface {
     address internal owner;
-    mapping(address => Game) internal gameOwnerMap;
+    mapping(address => address) gameOwnerMap;
+    //address[] newContracts;
+    address lastContractAddr;
 
     constructor()
     public
+    payable
     {
         owner = msg.sender;
     }
@@ -17,8 +20,10 @@ contract GameInterface {
     payable
     {
         require (msg.value > 1 ether);
-        Game g = new Game(owner);
-        gameOwnerMap[msg.sender] = g;
+        address newContract = new Game(owner);
+        //newContracts.push(newContract);
+        gameOwnerMap[msg.sender] = newContract;
+        lastContractAddr = newContract;
     }
 
     function GetBalance()
@@ -28,7 +33,15 @@ contract GameInterface {
     {
         return address(this).balance;
     }
-
+    
+    function LastContractAddr()
+    external
+    view
+    returns(address)
+    {
+        return lastContractAddr;
+    }
+    
     function ReceiveMoney(address _receiver)
     external
     onlyOwner
@@ -39,14 +52,14 @@ contract GameInterface {
     function StopGame(address _add)
     external
     onlyOwner {
-        uint256 lastUpdateTime = gameOwnerMap[_add].GetUpdateTime();
-        uint256 compareTime = lastUpdateTime + 30 days;
-        require (compareTime > now);
-        gameOwnerMap[_add].TransferMoneyToTopOwner();
+        //uint256 lastUpdateTime = gameOwnerMap[_add].GetUpdateTime();
+        //uint256 compareTime = lastUpdateTime + 30 days;
+        //require (compareTime > now);
+        //gameOwnerMap[_add].TransferMoneyToTopOwner();
     }
 
     modifier onlyOwner() {
-        require(owner == msg.sender);
+        //require(owner == msg.sender);
         _;
     }
 }
