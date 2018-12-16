@@ -1,0 +1,4 @@
+node_modules
+build
+secret.js
+app/.cache-loader
